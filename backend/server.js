@@ -15,7 +15,7 @@ bodyParser = require("body-parser");
 const app = express();
 const port = 3001;
 
-const clerkClient = createClerkClient({ secretKey: 'sk_test_KDg7LeajIQ9u36yQkxJJNYEUnHiWJGlARdclk1t2nh'})
+const clerkClient = createClerkClient({ secretKey: 'YOUR_CLERK_SECRET_KEY'})
 const provider = 'oauth_linkedin_oidc';
 
 app.use(cors({
