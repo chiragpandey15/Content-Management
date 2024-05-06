@@ -81,6 +81,7 @@
     text-decoration: none;
   }
   
+<<<<<<< HEAD
 
   .main-text {
     display: flex;
@@ -91,4 +92,6 @@
     font-weight: bolder;
     margin-bottom: 0;
   }
+=======
+>>>>>>> 9eb881ae797dfcb5a30a00701fa97e90cf8af5cf
   

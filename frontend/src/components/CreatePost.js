@@ -1,17 +1,23 @@
 import React,{useState} from 'react';
 import { useUser } from "@clerk/clerk-react";
 
+<<<<<<< HEAD
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+=======
+>>>>>>> 9eb881ae797dfcb5a30a00701fa97e90cf8af5cf
 
 import './CreatePost.css'
 
 import { Sidebar } from './Sidebar';
+<<<<<<< HEAD
 import { MdDelete } from "react-icons/md";
 import { Modal, Button, Select, MenuItem, TextField,Stack } from '@mui/material';
 import { LocalizationProvider, DatePicker } from '@mui/x-date-pickers';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs'
 
+=======
+>>>>>>> 9eb881ae797dfcb5a30a00701fa97e90cf8af5cf
 
 function CreatePost() {
 
@@ -21,11 +27,14 @@ function CreatePost() {
     const [text, setText] = useState('');
     const [image, setImage] = useState(null);
 
+<<<<<<< HEAD
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [scheduledTime, setScheduledTime] = useState(null);
     const [scheduledDate, setScheduledDate] = useState();
 
 
+=======
+>>>>>>> 9eb881ae797dfcb5a30a00701fa97e90cf8af5cf
 
     const handleTextChange = (e) => {
         setText(e.target.value);
@@ -33,7 +42,10 @@ function CreatePost() {
 
     const handleImageChange = (e) => {
         const file = e.target.files[0];
+<<<<<<< HEAD
         
+=======
+>>>>>>> 9eb881ae797dfcb5a30a00701fa97e90cf8af5cf
         setImage(file);
         const reader = new FileReader();
         reader.readAsDataURL(file);
@@ -43,10 +55,13 @@ function CreatePost() {
         };
     };
 
+<<<<<<< HEAD
     const deleteImage = (e) =>{
       setImage(null);
     };
 
+=======
+>>>>>>> 9eb881ae797dfcb5a30a00701fa97e90cf8af5cf
     const handleSubmit = async (e) => {
         try{
             e.preventDefault();
@@ -57,7 +72,11 @@ function CreatePost() {
                     'userID':user.id,
                 }
                 
+<<<<<<< HEAD
                 await fetch('https://t-skyline-387001.el.r.appspot.com/publishText', {
+=======
+                await fetch('https://clean-pilot-386800.wl.r.appspot.com/publishText', {
+>>>>>>> 9eb881ae797dfcb5a30a00701fa97e90cf8af5cf
                 method: 'POST',
                 
                 headers: {
@@ -77,7 +96,10 @@ function CreatePost() {
                   .catch(error => {
                     console.error('Error:', error);
                   });
+<<<<<<< HEAD
                   toast.success("Successfully Shared");
+=======
+>>>>>>> 9eb881ae797dfcb5a30a00701fa97e90cf8af5cf
 
             }else{
                 const body = {
@@ -87,7 +109,11 @@ function CreatePost() {
                 }
                 console.log(body);
                 // await fetch('http://localhost:3001/publishText', {
+<<<<<<< HEAD
                 await fetch('https://t-skyline-387001.el.r.appspot.com/publishText', {
+=======
+                await fetch('https://clean-pilot-386800.wl.r.appspot.com/publishText', {
+>>>>>>> 9eb881ae797dfcb5a30a00701fa97e90cf8af5cf
                 method: 'POST',
                 
                 headers: {
@@ -107,7 +133,10 @@ function CreatePost() {
                   .catch(error => {
                     console.error('Error:', error);
                   });
+<<<<<<< HEAD
                   toast.success("Successfully Shared");
+=======
+>>>>>>> 9eb881ae797dfcb5a30a00701fa97e90cf8af5cf
             }
             
         }catch(error){
@@ -117,6 +146,7 @@ function CreatePost() {
         setImage(null);
     };
 
+<<<<<<< HEAD
     const handleSchedule = () => {
       setIsModalOpen(true);
     };
@@ -242,10 +272,13 @@ function CreatePost() {
             });
     }
     
+=======
+>>>>>>> 9eb881ae797dfcb5a30a00701fa97e90cf8af5cf
 
     return (
         <div style={{display:"flex", backgroundColor:"lightgray"}}>
             <Sidebar/>
+<<<<<<< HEAD
             <ToastContainer />
             <div className="fullpage-form">
               <form onSubmit={handleSubmit}>
@@ -310,6 +343,26 @@ function CreatePost() {
           </form>
         </div>
       </Modal>   
+=======
+
+            <div className="fullpage-form">
+            <form onSubmit={handleSubmit}>
+                <textarea
+                    value={text}
+                    onChange={handleTextChange}
+                    placeholder="Write your story"
+                    rows={30}
+                    cols={50}
+                />
+                <input type="file"
+                        accept="image/*"
+                        onChange={handleImageChange}
+                        />
+                <button type='submit'>Publish</button>
+            </form>
+        </div>
+
+>>>>>>> 9eb881ae797dfcb5a30a00701fa97e90cf8af5cf
         </div>
     );
 

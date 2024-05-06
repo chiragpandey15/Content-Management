@@ -18,7 +18,11 @@ function Sidebar() {
                 <div className="logo">
                     <img src={myImage} alt="Company Logo" />
                 </div>
+<<<<<<< HEAD
                 <span>CMS</span>
+=======
+                <span>Lica </span>
+>>>>>>> 9eb881ae797dfcb5a30a00701fa97e90cf8af5cf
             </div>
 
             </li>
