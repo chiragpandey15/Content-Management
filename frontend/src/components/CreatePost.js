@@ -12,6 +12,8 @@ import { Modal, Button, Select, MenuItem, TextField,Stack } from '@mui/material'
 import { LocalizationProvider, DatePicker } from '@mui/x-date-pickers';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs'
 
+import { FaMagic, FaCheckCircle} from 'react-icons/fa';
+
 
 function CreatePost() {
 
@@ -24,6 +26,15 @@ function CreatePost() {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [scheduledTime, setScheduledTime] = useState(null);
     const [scheduledDate, setScheduledDate] = useState();
+
+
+    const [grammaticallyCorrectText, setGrammarticallyCorrectText] = useState('Something went wrong.');
+    const [isGrammarModalOpen, setIsGrammarModalOpen] = useState(false);
+
+    const [topic, setTopic] = useState('');
+    const [postStyle, setPostStyle] = useState(null);
+    const [generateContentText, setgenerateContentText] = useState('');
+    const [isgenerateContentModalOpen, setIsgenerateContentModalOpen] = useState(false);
 
 
 
@@ -138,6 +149,7 @@ function CreatePost() {
       console.log(scheduledAt);
             try{
               e.preventDefault();
+              console.log("Hi");
               if(text==null && image==null) return;
               if(image==null){
                   const body = {
@@ -215,66 +227,234 @@ function CreatePost() {
       setIsModalOpen(false);
     };
 
-    const fetchPost = async (e) =>{
-      const body = {
-        'userID':user.id
+    const handleGrammarModalClose = () =>{
+      setGrammarticallyCorrectText('');
+      setIsGrammarModalOpen(false);
     }
-      await fetch('http://localhost:3001/fetchUserPosts', {
-        // await fetch('https://t-skyline-387001.el.r.appspot.com/schedulePost', {
-          method: 'POST',
-          
-          headers: {
-              'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(body)
-          }).then(response => {
-              if (!response.ok) {
-                throw new Error('Network response was not ok');
-              }
-              console.log(response);
+
+    const handlegenerateContentModalClose = () =>{
+      setgenerateContentText('');
+      setIsgenerateContentModalOpen(false);
+    }
+
+    const generateContent = async (e) =>{
+      //TODO
+      if(topic.length<2 || postStyle==null){
+        toast.warning("Please complete the form.");
+        return;
+      }
+
+      try{
+
+        const body = {
+          'topic':topic,
+          'style':postStyle
+        }
+            
+            // await fetch('http://localhost:3001/generateContent', {
+            await fetch('https://t-skyline-387001.el.r.appspot.com/generateContent', {
+            method: 'POST',
+            
+            headers: {
+                'Content-Type': 'application/json'
+              },
+              body: JSON.stringify(body)
+            }).then(response => {
+                if (!response.ok) {
+                  throw new Error('Network response was not ok');
+                }
+                console.log(response);
+                return response.json();
+              })
+              .then(data => {
+                console.log('LinkedIn API response:', data.text);
+                setgenerateContentText(data.text);
+                // TODO change button
             })
-            .then(data => {
-              console.log('LinkedIn API response:', data);
-              
-          })
-            .catch(error => {
-              console.error('Error:', error);
-            });
+              .catch(error => {
+                console.error('Error:', error);
+              });
+
+
+      }catch(e){
+        console.log(e);
+      }
+      
+    };
+
+
+    const checkGrammar = async () =>{
+      if(text.length<20){
+        toast.warning("Text is too small.")
+        return;
+      }else{
+          try{
+            
+            const body = {
+              'text':text,
+            }
+                
+                // await fetch('http://localhost:3001/checkGrammar', {
+                await fetch('https://t-skyline-387001.el.r.appspot.com/checkGrammar', {
+                method: 'POST',
+                
+                headers: {
+                    'Content-Type': 'application/json'
+                  },
+                  body: JSON.stringify(body)
+                }).then(response => {
+                    if (!response.ok) {
+                      throw new Error('Network response was not ok');
+                    }
+                    console.log(response);
+                    return response.json();
+                  })
+                  .then(data => {
+                    console.log('LinkedIn API response:', data.text);
+                    setGrammarticallyCorrectText(data.text);
+                })
+                  .catch(error => {
+                    console.error('Error:', error);
+                  });
+                  // toast.success("Successfully scheduled");
+
+            }catch(error){
+              console.log(error);
+            }
+            setIsGrammarModalOpen(true);
+      }
     }
-    
+
+
 
     return (
         <div style={{display:"flex", backgroundColor:"lightgray"}}>
-            <Sidebar/>
+            <Sidebar prompt="createPost"/>
             <ToastContainer />
-            <div className="fullpage-form">
-              <form onSubmit={handleSubmit}>
-                  <div className='textBox'>
-                    <textarea
-                        value={text}
-                        onChange={handleTextChange}
-                        placeholder="Write your story"
-                        rows={20}
-                        cols={50}
-                    />
-                    {image && (
-                      <div className='image-box'>
-                        <MdDelete onClick={deleteImage} style={{position:'absolute', right:'0', opacity:'20%'}}/>
-                        <img src={image} alt="Uploaded" style={{ width: '100%', height: '100%' }} />
-                      </div>
-                    )}
-                  </div>
-                  <input type="file"
-                          accept="image/*"
-                          onChange={handleImageChange}
-                          />
-                  
-                  <div style={{display:'flex'}}>
-                    <button type="button" onClick={handleSchedule} style={{marginRight:'10px', width:'150px'}}>Schedule</button>
-                    <button type='submit'>Publish</button>
-                  </div>
-              </form>
+              
+              <div className="fullpage-form" style={{flex:'10'}}>
+                <form onSubmit={handleSubmit}>
+                    <div className='textBox'>
+                      <textarea
+                          value={text}
+                          onChange={handleTextChange}
+                          placeholder="Write your story"
+                          rows={20}
+                          cols={50}
+                      />
+                      {image && (
+                        <div className='image-box'>
+                          <MdDelete onClick={deleteImage} style={{opacity:'20%'}} />
+                          <img src={image} alt="Uploaded" style={{ width: '100%', height: '100%' }} />
+                        </div>
+                      )}
+                    </div>
+                    <div style={{display:'flex', marginBottom:'10px'}}>
+                    <input type="file"
+                            accept="image/*"
+                            onChange={handleImageChange}
+                            />
+                    <div >
+                    <div className='generate-icon-contaier'>
+
+                      <FaMagic onClick={(e)=>{setIsgenerateContentModalOpen(true);}} style={{marginRight:'20px'}}/>
+                      
+                      <div className="generate-icon-description">Generate content</div>
+                    </div>
+
+                    <div className='check-icon-contaier'>
+
+                    <FaCheckCircle onClick={checkGrammar}/>
+                      
+                      <div className="check-icon-description">Check grammar</div>
+                    </div>
+                    
+                    
+                    </div>
+                    </div>
+                    <div style={{display:'flex'}}>
+                      <button type="button" onClick={handleSchedule} style={{marginRight:'10px', width:'150px'}}>Schedule</button>
+                      <button type='submit'>Publish</button>
+                    </div>
+                </form>
+              </div>
+
+
+            <Modal
+        open={isGrammarModalOpen}
+        onClose={handleGrammarModalClose}
+        aria-labelledby="modal-modal-title"
+        aria-describedby="modal-modal-description"
+      >
+        <div className="modal-content" style={{width:'600px'}}>
+          <span className="close" onClick={handleGrammarModalClose}>&times;</span>
+          <h2>Grammar Check</h2>
+          <textarea
+                          value={grammaticallyCorrectText}
+                          onChange={(e)=>{setGrammarticallyCorrectText(e.target.value)}}
+                          rows={10}
+                          cols={70}
+                      />
+              <Button variant="contained" onClick={(e)=>{setText(grammaticallyCorrectText); handleGrammarModalClose();}}>Replace</Button>
+          </div>
+          </Modal>  
+
+{/**********************************/}                    
+
+          <Modal
+        open={isgenerateContentModalOpen}
+        onClose={handlegenerateContentModalClose}
+        aria-labelledby="modal-modal-title"
+        aria-describedby="modal-modal-description"
+      >
+
+      
+
+        <div className="modal-content" style={{width:'600px'}}>
+          <span className="close" onClick={handlegenerateContentModalClose}>&times;</span>
+          <h2>Generate Content</h2>
+          
+          <form>
+            <div className="form-group">
+              <label htmlFor="topic">Topic:</label>
+              <input
+                type="text"
+                id="topic"
+                placeholder="Enter topic"
+                onChange={(e) => setTopic(e.target.value)}
+                required
+              />
             </div>
+            <div className="form-group">
+              <label htmlFor="category">Category:</label>
+              <select
+                id="category"
+                onChange={(e) => setPostStyle(e.target.value)}
+                required
+              >
+                <option value="">Select category</option>
+                <option value="Formal">Formal</option>
+                <option value="Informal">Informal</option>
+                <option value="Motivation">Motivation</option>
+                <option value="Humour">Humour</option>
+                <option value="Challenge">Challenge</option>
+                <option value="Promote">Promote</option>
+              </select>
+            </div>
+            {generateContentText.length>0? <div><textarea
+                          value={generateContentText}
+                          onChange={(e)=>{setgenerateContentText(e.target.value)}}
+                          rows={10}
+                          cols={70}
+                      /><br/><Button  variant="contained" onClick={(e)=>{setText(generateContentText); handlegenerateContentModalClose();}}>Replace</Button></div>
+            :<Button  variant="contained" onClick={generateContent}>Generate Content</Button>}
+          </form>
+          
+          </div>
+          </Modal>  
+
+          {/**********************************/}
+            
 
             <Modal
         open={isModalOpen}
@@ -284,6 +464,7 @@ function CreatePost() {
       >
         <div className="modal-content">
           <span className="close" onClick={handleModalClose}>&times;</span>
+          <h2>Schedule Post</h2>
           <form onSubmit={handleScheduleSubmit}>
           {/* <form onSubmit={fetchPost}> */}
             <LocalizationProvider dateAdapter={AdapterDayjs}>

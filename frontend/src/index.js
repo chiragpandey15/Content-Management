@@ -9,7 +9,7 @@ import { ClerkProvider } from '@clerk/clerk-react'
 const root = ReactDOM.createRoot(document.getElementById('root'));
 
 // TODO: Move to environment variable
-const PUBLISHABLE_KEY = "YOUR_API_KEY"
+const PUBLISHABLE_KEY = "pk_test_ZGlzY3JldGUtY29kLTEuY2xlcmsuYWNjb3VudHMuZGV2JA"
 
 if (!PUBLISHABLE_KEY) {
   throw new Error("Missing Publishable Key")

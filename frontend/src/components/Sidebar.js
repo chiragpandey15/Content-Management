@@ -3,44 +3,51 @@ import { useUser, UserButton } from "@clerk/clerk-react";
 import { FaFontAwesome, FaPen, FaLightbulb, FaToolbox, FaArrowUp } from 'react-icons/fa';
 import myImage from '../icon.png'; 
 
-import './Sidebar.css'
+import './Sidebar.css';
+import { useNavigate, useNavigation } from 'react-router-dom';
 
-function Sidebar() {
+
+function Sidebar(prompt) {
 
     const { user } = useUser();
+    const history = useNavigate();
+    
+    const goToScheduledPost = () => {
+        console.log("goToScheduledPost clicked")
+        history('/scheduledPost');
+        
+      };
+
+    const goToFirstpage = () => {
+        history('/');
+    }
     
   return (
     
         <div className="sidebar">
         <ul>
-            <li>
+            <li onClick={goToFirstpage}>
             <div className='company'>
                 <div className="logo">
                     <img src={myImage} alt="Company Logo" />
                 </div>
-<<<<<<< HEAD
                 <span>CMS</span>
-=======
-                <span>Lica </span>
->>>>>>> 9eb881ae797dfcb5a30a00701fa97e90cf8af5cf
             </div>
 
             </li>
-            <li style={{backgroundColor:"lightgray", borderRadius:"5px", padding:"10px"}}>
-                <FaPen /> Create
-            </li>
-            <li>
-            <FaFontAwesome /> Post
-            </li>
-            <li>
-            <FaLightbulb /> Content Idea
-            </li>
-            <li>
-            <FaToolbox /> Tools
-            </li>
-            <li>
-                <FaArrowUp /> Upgrade
-            </li>
+            {prompt.prompt=="createPost"? <li
+                style={{backgroundColor:"lightgray", borderRadius:"5px", padding:"10px"}} 
+                onClick={goToFirstpage}
+            >
+                <FaPen style={{paddingRight:'5px'}}/> Create Post
+            </li> : <li onClick={goToFirstpage}><FaPen style={{paddingRight:'5px'}}/> Create Post</li>}
+            {prompt.prompt=="scheduledPost"?
+            <li 
+            style={{backgroundColor:"lightgray", borderRadius:"5px", padding:"10px"}} 
+            onClick={goToScheduledPost}>
+            <FaFontAwesome style={{paddingRight:'5px'}}/> Scheduled Post
+            </li>: <li onClick={goToScheduledPost}><FaFontAwesome style={{paddingRight:'5px'}}/> Scheduled Post</li>}
+            
         </ul>
         <div className="sign-out">
         <UserButton />
