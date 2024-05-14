@@ -1,15 +1,18 @@
 
-// import express from 'express';
-// import cors from 'cors';
-// import { createClerkClient } from '@clerk/clerk-sdk-node';
-// import bodyParser from 'body-parser';
-
 const express = require('express')
 const cors = require('cors')
 const { createClerkClient } = require('@clerk/clerk-sdk-node');
 bodyParser = require("body-parser");
 const admin = require('firebase-admin');
-// import admin from 'firebase-admin';
+
+const dotenv = require('dotenv');
+const {GoogleGenerativeAI} = require('@google/generative-ai');
+const { collection, query, where, getDocs, documentId } = require('firebase/firestore');
+
+
+dotenv.config();
+
+const genAI = new GoogleGenerativeAI('AIzaSyDsRoLEpoWfaAJoD0P0B4zpLa_PF1CflSg');
 
 
 const app = express();
@@ -24,7 +27,7 @@ admin.initializeApp({
 
 const db = admin.firestore();
 
-const clerkClient = createClerkClient({ secretKey: 'YOUR_SECRET_KET'})
+const clerkClient = createClerkClient({ secretKey: process.env.CLERK_SECRET_KEY})
 const provider = 'oauth_linkedin_oidc';
 
 app.use(cors({
@@ -360,46 +363,6 @@ async function workAsScheduled(){
   
 }
 
-// app.post('/fetchUserPosts', async (req,res)=>{
-//   let body = req.body;
-  
-//   // Getting access Token of linkedin from clerk
-//   const token = await clerkClient.users.getUserOauthAccessToken(body.userID, provider);
-  
-//   try {
-
-//      // Getting userID from linkedin, required in future api call
-//   var response  = await fetch ('https://api.linkedin.com/v2/userinfo',{
-//     headers: {
-//         'Authorization': `Bearer ${token[0].token}`,
-//       },
-//     });
-
-//   const data = await response.json();
-//       console.log(`https://api.linkedin.com/rest/posts?author=urn%3Ali%3Aperson%3A${data.sub}&q=author&count=10&sortBy=LAST_MODIFIED`);
-//       console.log(token[0].token);
-
-//       response = await fetch(`https://api.linkedin.com/rest/posts?author=urn%3Ali%3Aperson%3A${data.sub}&q=author&count=10&sortBy=LAST_MODIFIED`, {
-//         headers: {
-//           'Authorization': `Bearer ${token[0].token}`,
-//           'X-RestLi-Method':'FINDER',
-//           'X-Restli-Protocol-Version': '2.0.0',
-//           'LinkedIn-Version':'202301'
-//         }});
-
-//       // Process posts
-//       console.log(response);
-//       const posts = response.data.elements;
-//       for (const post of posts) {
-//           console.log(post.id);
-//           console.log(post.content);
-//           // await fetchPostReactions(post.id);
-//       }
-//   } catch (error) {
-//       console.error('Error fetching user posts:', error);
-//   }
-// });
-
 
 app.get('/publishScheduledPost',async (req,res) => {
     workAsScheduled();
@@ -408,10 +371,131 @@ app.get('/publishScheduledPost',async (req,res) => {
 
 
 
+async function grammarCheck(text){
+  const model = genAI.getGenerativeModel({model:'gemini-pro'});
+  
+  const prompt = `${text} \n \n Give grammatically correct version of the above text.`;
+
+  const result = await model.generateContent(prompt);
+
+  const res = result.response.text();
+  return res;
+}
+
+app.post('/checkGrammar', async (req,res)=>{
+    let body = req.body;
+
+    try{
+      
+      text = await grammarCheck(body.text);
+      
+      res.json({'text':text});
+    }catch(error){
+      console.log(error);
+      res.json({'error':error});
+    }
+    
+});
 
 
-// const PORT = process.env.PORT || 8080;
-// app.listen(PORT, () => {
-//   console.log(`Server listening on port ${PORT}...`);
-// });
-app.listen(port);
+async function generateContent(topic,style){
+
+  
+  const prompt = `Give content for linkedin post for following topic and in following style. 
+  \n\n Topic: ${topic} \n\n Style: ${style}`;
+  console.log(prompt);
+  
+  const model = genAI.getGenerativeModel({model:'gemini-pro'});
+  
+
+  const result = await model.generateContent(prompt);
+
+  const res = result.response.text();
+  return res;
+}
+
+
+app.post('/generateContent',async (req,res)=>{
+  let body = req.body;
+
+  try{
+    text = await generateContent(body.topic, body.style);
+    console.log(text);
+    res.json({'text':text});
+  }catch(e){
+    console.log(e);
+    res.json({'error':e});
+  }
+});
+
+app.get('/getScheduledPost',async (req,res)=>{
+  userID = req.query.userID;
+  console.log("Hi there");
+  try{
+    const collectionRef = db.collection(databaseName);
+
+    const snapshot = await collectionRef.get();
+    const post = [];
+
+    snapshot.forEach(async document => {
+        body = document.data();
+        if(body.userID==userID){
+          body.documentID = document.id;
+          post.push(body);
+        }
+    });
+    console.log(post);
+    res.json(post);
+
+
+  }catch(e){
+    console.log(e);
+    res.send({'error':e});
+  }
+});
+
+app.post("/editSchedulePost",async (req,res)=>{
+  body = req.body;
+
+  try{
+    let docPath = databaseName+'/'+body.documentID;
+
+    delete req.body.documentID;
+
+    db.doc(docPath).update(body)
+    .then(() => {
+      console.log('Document successfully updated!');
+    })
+    .catch((error) => {
+      console.error('Error updating document:', error);
+    });
+
+  }catch(e){
+    console.log(e);
+    res.json({'error':e});
+  }
+
+});
+
+app.post("/deleteSchedulePost", async (req,res)=>{
+  body = req.body;
+  console.log(req.body);
+  try{
+    console.log("In Delete");
+    console.log(body);
+    let docID = body.documentID;
+    await db.collection(databaseName).doc(docID).delete();
+    
+    res.json({'status':'ok'});
+  }catch(e){
+    console.log(e);
+    res.json({"error":e});
+  }
+});
+
+
+const PORT = process.env.PORT || 8080;
+app.listen(PORT, () => {
+  console.log(`Server listening on port ${PORT}...`);
+});
+// app.listen(port);
