@@ -12,7 +12,7 @@ const { collection, query, where, getDocs, documentId } = require('firebase/fire
 
 dotenv.config();
 
-const genAI = new GoogleGenerativeAI('AIzaSyDsRoLEpoWfaAJoD0P0B4zpLa_PF1CflSg');
+const genAI = new GoogleGenerativeAI(YOUR_API_KEY);
 
 
 const app = express();
